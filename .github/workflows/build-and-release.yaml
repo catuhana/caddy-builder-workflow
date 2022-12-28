@@ -72,6 +72,7 @@ jobs:
               .join(' ');
 
       - name: Determine Caddy Container image version
+        uses: actions/github-script@v6.3.3
         id: caddy-container-image-version
         with:
           result-encoding: string
