@@ -63,7 +63,7 @@ jobs:
         uses: actions/github-script@v6.3.3
         id: container-tags
         with:
-          results-encoding: string
+          result-encoding: string
           script: |
             const caddyPlugins = context.payload.inputs.caddy_plugins;
             return caddyPlugins
