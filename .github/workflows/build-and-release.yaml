@@ -85,10 +85,10 @@ jobs:
 
       - name: Create Containerfile
         run: |
-          cat <<EOL >Containerfile
+          cat <<'EOL' >Containerfile
           ARG CADDY_VERSION=alpine
 
-          FROM docker.io/caddy:\${CADDY_VERSION}
+          FROM docker.io/caddy:${CADDY_VERSION}
           COPY ./caddy /usr/bin/caddy
           EOL
 
