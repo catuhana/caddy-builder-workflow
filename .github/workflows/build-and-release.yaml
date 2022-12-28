@@ -71,13 +71,21 @@ jobs:
               .map((plugin) => `with-${plugin.split('/').pop().replace('@', '-')}`)
               .join(' ');
 
+      - name: Determine Caddy Container image version
+        id: caddy-container-image-version
+        with:
+          result-encoding: string
+          script: |
+            const caddyVersion = context.payload.inputs.caddy_version;
+            return caddyVersion === 'latest' ? 'alpine' : caddyVersion;
+
       - name: Build Caddy with plugins
         run: xcaddy build ${{ steps.build-flags.outputs.result }}
 
       - name: Create Containerfile
         run: |
           cat <<EOL >Containerfile
-          ARG CADDY_VERSION=latest
+          ARG CADDY_VERSION=alpine
 
           FROM docker.io/caddy:\${CADDY_VERSION}
           COPY ./caddy /usr/bin/caddy
@@ -91,6 +99,8 @@ jobs:
           tags: ${{ github.event.inputs.caddy_version }} ${{ steps.container-tags.outputs.result }}
           containerfiles: |
             ./Containerfile
+          build-args: |
+            CADDY_VERSION=${{ github.caddy-container-image-version.outputs.result }}
 
       - name: Push to ghcr.io
         uses: redhat-actions/push-to-registry@v2.6
