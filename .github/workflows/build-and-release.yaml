@@ -81,8 +81,6 @@ jobs:
 
           FROM docker.io/caddy:${CADDY_VERSION}
           COPY ./caddy /usr/bin/caddy
-
-          VOLUME [ '/logs' ]
           EOL
 
       - name: Build Container image
