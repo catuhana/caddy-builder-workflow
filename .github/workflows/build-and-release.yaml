@@ -68,7 +68,7 @@ jobs:
             const caddyPlugins = context.payload.inputs.caddy_plugins;
             return caddyPlugins
               .split(',')
-              .map((plugin) => `with-${plugin.split('/').pop().replace('@', '-')}`)
+              .map((plugin) => `with-plugin-${plugin.split('/').pop().replace('@', '-')}`)
               .join(' ');
 
       - name: Build Caddy with plugins
