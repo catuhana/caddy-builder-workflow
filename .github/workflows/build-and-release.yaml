@@ -22,19 +22,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Caddy GitHub repository
-        uses: actions/checkout@v3.2.0
+        uses: actions/checkout@v3
         with:
           repository: caddyserver/caddy
           fetch-depth: 0
 
       - name: Setup Go environment
-        uses: actions/setup-go@v3.5.0
+        uses: actions/setup-go@v3
         with:
           go-version: stable
           cache: true
 
       - name: Login to ghcr.io
-        uses: redhat-actions/podman-login@v1.4
+        uses: redhat-actions/podman-login@v1
         with:
           username: ${{ github.actor }}
           password: ${{ github.token }}
@@ -47,7 +47,7 @@ jobs:
           sudo apt install ./xcaddy.deb
 
       - name: Generate arguments for xcaddy
-        uses: actions/github-script@v6.3.3
+        uses: actions/github-script@v6
         id: build-flags
         with:
           result-encoding: string
@@ -60,7 +60,7 @@ jobs:
             	.join(' ')}`;
 
       - name: Generate Container tags
-        uses: actions/github-script@v6.3.3
+        uses: actions/github-script@v6
         id: container-tags
         with:
           result-encoding: string
@@ -85,7 +85,7 @@ jobs:
 
       - name: Build Container image
         id: build-container-image
-        uses: redhat-actions/buildah-build@v2.10
+        uses: redhat-actions/buildah-build@v2
         with:
           image: caddy
           tags: ${{ github.event.inputs.caddy_version }} ${{ steps.container-tags.outputs.result }}
@@ -95,14 +95,14 @@ jobs:
             CADDY_VERSION=${{ github.event.inputs.caddy_version }}
 
       - name: Push to ghcr.io
-        uses: redhat-actions/push-to-registry@v2.6
+        uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-container-image.outputs.image }}
           tags: ${{ steps.build-container-image.outputs.tags }}
           registry: ghcr.io/${{ github.repository_owner }}
 
       - name: Upload built binary to workflow artifacts
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v3
         with:
           name: caddy
           path: ./caddy
