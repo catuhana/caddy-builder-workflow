@@ -10,7 +10,7 @@ on:
       xcaddy_version:
         description: xcaddy version
         type: string
-        default: '0.3.1'
+        default: 0.3.2
       caddy_plugins:
         description: Caddy plugins to build with. Plugins are comma separated.
         type: string
