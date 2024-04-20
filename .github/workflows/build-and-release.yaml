@@ -93,7 +93,9 @@ jobs:
             ${{ steps.container-plugin-tags.outputs.container-plugin-tags }}
 
       - name: Build Caddy with plugins
-        run: xcaddy build ${{ steps.build-arguments.outputs.result }}
+        run: xcaddy build ${{ steps.build-arguments.outputs.build-arguments }}
+        env:
+          CADDY_VERSION: v${{ env.CADDY_VERSION }}
 
       - name: Create Containerfile
         run: |
