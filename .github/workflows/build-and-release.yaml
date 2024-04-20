@@ -67,7 +67,7 @@ jobs:
 
       - name: Generate build arguments for xcaddy
         id: build-arguments
-        run: echo -n "build-arguments=$(echo '${{ inputs.caddy_plugins }}' | awk -v RS=',' '{printf "--with %s ", $0}')" >>$GITHUB_OUTPUT
+        run: echo "build-arguments=\"$(echo -n '${{ inputs.caddy_plugins }}' | awk -v RS=',' '{printf "--with %s ", $0}')\"" >>$GITHUB_OUTPUT
 
       - name: Generate plugin tags for container image
         id: container-plugin-tags
