@@ -62,7 +62,7 @@ jobs:
       - name: Install xcaddy
         run: |
           curl -fsSL -o xcaddy.deb \
-            https://github.com/caddyserver/xcaddy/releases/download/${XCADDY_VERSION}/xcaddy_${XCADDY_VERSION:1}_linux_amd64.deb
+            https://github.com/caddyserver/xcaddy/releases/download/${XCADDY_VERSION}/xcaddy_${XCADDY_VERSION#v}_linux_amd64.deb
           sudo apt install ./xcaddy.deb
 
       - name: Generate build arguments for xcaddy
@@ -95,7 +95,7 @@ jobs:
           cat <<'EOF' >Containerfile
           ARG CADDY_VERSION
 
-          FROM docker.io/caddy:${CADDY_VERSION}
+          FROM docker.io/caddy:${CADDY_VERSION#v}
           COPY ./caddy /usr/bin/caddy
           EOF
 
