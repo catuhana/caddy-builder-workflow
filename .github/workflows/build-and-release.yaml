@@ -87,8 +87,9 @@ jobs:
             tuhana/${{ env.IMAGE_NAME }}
             ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags: |
-            latest
-            ${{ env.CADDY_VERSION }}
+            type=semver,pattern={{version}},value=${{ env.CADDY_VERSION }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ env.CADDY_VERSION }}
+            type=semver,pattern={{major}},value=${{ env.CADDY_VERSION }}
             ${{ steps.container-plugin-tags.outputs.container-plugin-tags }}
 
       - name: Build Caddy with plugins
