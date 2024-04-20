@@ -83,7 +83,7 @@ jobs:
         with:
           images: |
             tuhana/${{ env.IMAGE_NAME }}
-            ghcr.io/${{ env.IMAGE_NAME }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags: |
             latest
             ${{ env.CADDY_VERSION }}
