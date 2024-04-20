@@ -10,11 +10,15 @@ on:
       xcaddy_version:
         description: xcaddy version
         type: string
-        default: 0.4.0
+        default: latest
       caddy_plugins:
         description: Plugins to build Caddy with. Plugins are comma separated.
         type: string
         default: github.com/caddy-dns/cloudflare
+
+env:
+  CADDY_VERSION: ${{ github.event.inputs.caddy_version }}
+  XCADDY_VERSION: ${{ github.event.inputs.xcaddy_version }}
 
 jobs:
   build-and-release:
@@ -22,23 +26,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Caddy GitHub repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: caddyserver/caddy
           fetch-depth: 0
 
-      - name: Setup Go environment
-        uses: actions/setup-go@v3
+      - name: Set-up Go
+        uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: stable # Use latest stable since Caddy recommends higher versions instead of one specific one
           cache: true
 
-      - name: Login to ghcr.io
-        uses: redhat-actions/podman-login@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-          registry: ghcr.io/${{ github.repository_owner }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: tuhana
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Retrieve latest Caddy version
+        if: ${{ github.event.inputs.caddy_version == 'latest' }}
+        run: echo "CADDY_VERSION=$(curl -s https://api.github.com/repos/caddyserver/caddy/releases/latest | jq -r '.tag_name')" >>$GITHUB_ENV
+
+      - name: Retrieve latest xcaddy version
+        if: ${{ github.event.inputs.xcaddy_version == 'latest' }}
+        run: echo "XCADDY_VERSION=$(curl -s https://api.github.com/repos/caddyserver/xcaddy/releases/latest | jq -r '.tag_name')" >>$GITHUB_ENV
 
       - name: Install xcaddy
         run: |
@@ -46,63 +65,48 @@ jobs:
             https://github.com/caddyserver/xcaddy/releases/download/v${{ github.event.inputs.xcaddy_version }}/xcaddy_${{ github.event.inputs.xcaddy_version }}_linux_amd64.deb
           sudo apt install ./xcaddy.deb
 
-      - name: Generate arguments for xcaddy
-        uses: actions/github-script@v6
-        id: build-flags
-        with:
-          result-encoding: string
-          script: |
-            const caddyVersion = context.payload.inputs.caddy_version;
-            const caddyPlugins = context.payload.inputs.caddy_plugins;
-            return `${caddyVersion} ${caddyPlugins
-            	.split(',')
-            	.map((plugin) => `--with ${plugin}`)
-            	.join(' ')}`;
+      - name: Generate build arguments for xcaddy
+        id: build-arguments
+        run: echo "build-arguments=$(echo '${{ inputs.caddy_plugins }}' | awk -v RS=',' '{printf "--with %s ", $0}')" >>$GITHUB_OUTPUT
 
-      - name: Generate Container tags
-        uses: actions/github-script@v6
-        id: container-tags
+      - name: Generate plugin tags for container image
+        id: container-plugin-tags
+        run: echo "container-plugin-tags=$(echo '${{ inputs.caddy_plugins }}' | awk 'BEGIN{RS=","; FS="/"} {gsub("@","-",$NF); print "with-plugin-%s ", $NF}')" >>$GITHUB_OUTPUT
+
+      - name: Extract metadata for container image
+        uses: docker/metadata-action@v5
+        id: container-metadata
         with:
-          result-encoding: string
-          script: |
-            const caddyPlugins = context.payload.inputs.caddy_plugins;
-            return caddyPlugins
-              .split(',')
-              .map((plugin) => `with-plugin-${plugin.split('/').pop().replace('@', '-')}`)
-              .join(' ');
+          images: |
+            tuhana/caddy
+            ghcr.io/${{ github.repository }}
+          tags: |
+            ${{ env.CADDY_VERSION }}
+            ${{ steps.container-plugin-tags.outputs.container-plugin-tags }}
 
       - name: Build Caddy with plugins
-        run: xcaddy build ${{ steps.build-flags.outputs.result }}
+        run: xcaddy build ${{ steps.build-arguments.outputs.result }}
 
       - name: Create Containerfile
         run: |
-          cat <<'EOL' >Containerfile
-          ARG CADDY_VERSION=latest
+          cat <<'EOF' >Containerfile
+          ARG CADDY_VERSION
 
           FROM docker.io/caddy:${CADDY_VERSION}
           COPY ./caddy /usr/bin/caddy
-          EOL
+          EOF
 
-      - name: Build Container image
-        id: build-container-image
-        uses: redhat-actions/buildah-build@v2
+      - name: Build and publish container image
+        uses: docker/build-push-action@v5
         with:
-          image: caddy
-          tags: ${{ github.event.inputs.caddy_version }} ${{ steps.container-tags.outputs.result }}
-          containerfiles: |
-            ./Containerfile
-          build-args: |
-            CADDY_VERSION=${{ github.event.inputs.caddy_version }}
-
-      - name: Push to ghcr.io
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ steps.build-container-image.outputs.image }}
-          tags: ${{ steps.build-container-image.outputs.tags }}
-          registry: ghcr.io/${{ github.repository_owner }}
+          push: true
+          context: .
+          file: Containerfile
+          tags: ${{ steps.container-metadata.outputs.tags }}
+          labels: ${{ steps.container-metadata.outputs.labels }}
 
       - name: Upload built binary to workflow artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: caddy
           path: ./caddy
