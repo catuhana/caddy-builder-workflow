@@ -62,7 +62,7 @@ jobs:
       - name: Install xcaddy
         run: |
           curl -fsSL -o xcaddy.deb \
-            https://github.com/caddyserver/xcaddy/releases/download/v${{ github.event.inputs.xcaddy_version }}/xcaddy_${{ github.event.inputs.xcaddy_version }}_linux_amd64.deb
+            https://github.com/caddyserver/xcaddy/releases/download/${XCADDY_VERSION}/xcaddy_${XCADDY_VERSION:1}_linux_amd64.deb
           sudo apt install ./xcaddy.deb
 
       - name: Generate build arguments for xcaddy
