@@ -54,7 +54,9 @@ jobs:
 
       - name: Retrieve latest Caddy version
         if: ${{ github.event.inputs.caddy_version == 'latest' }}
-        run: echo "CADDY_VERSION=$(curl -s https://api.github.com/repos/caddyserver/caddy/releases/latest | jq -r '.tag_name')" >>$GITHUB_ENV
+        run: |
+          CADDY_VERSION=$(curl -s https://api.github.com/repos/caddyserver/caddy/releases/latest | jq -r '.tag_name')
+          echo "CADDY_VERSION=${CADDY_VERSION#v}" >>$GITHUB_ENV
 
       - name: Retrieve latest xcaddy version
         if: ${{ github.event.inputs.xcaddy_version == 'latest' }}
@@ -95,11 +97,9 @@ jobs:
       - name: Create Containerfile
         run: |
           cat <<'EOF' >Containerfile
-          #syntax=docker/dockerfile:1
-
           ARG CADDY_VERSION
 
-          FROM docker.io/caddy:${CADDY_VERSION#v}
+          FROM docker.io/caddy:${CADDY_VERSION}
           COPY ./caddy /usr/bin/caddy
           EOF
 
