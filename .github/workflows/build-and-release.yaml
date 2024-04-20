@@ -10,9 +10,9 @@ on:
       xcaddy_version:
         description: xcaddy version
         type: string
-        default: 0.3.4
+        default: 0.4.0
       caddy_plugins:
-        description: Caddy plugins to build with. Plugins are comma separated.
+        description: Plugins to build Caddy with. Plugins are comma separated.
         type: string
         default: github.com/caddy-dns/cloudflare
 
