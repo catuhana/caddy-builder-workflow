@@ -93,9 +93,11 @@ jobs:
       - name: Create Containerfile
         run: |
           cat <<'EOF' >Containerfile
-          ARG CADDY_VERSION=${CADDY_VERSION#v}
+          #syntax=docker/dockerfile:1
 
-          FROM docker.io/caddy:${CADDY_VERSION}
+          ARG CADDY_VERSION
+
+          FROM docker.io/caddy:${CADDY_VERSION#v}
           COPY ./caddy /usr/bin/caddy
           EOF
 
