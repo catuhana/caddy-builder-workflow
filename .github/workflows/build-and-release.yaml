@@ -73,7 +73,7 @@ jobs:
         id: container-plugin-tags
         run: |
           {
-            echo "container-plugin-tags=$(echo '${{ inputs.caddy_plugins }}' | awk 'BEGIN{RS=","; FS="/"} {gsub("@","-",$NF); printf "with-plugin-%s ", $NF}')"
+            echo "container-plugin-tags=$(echo -n '${{ inputs.caddy_plugins }}' | awk 'BEGIN{RS=","; FS="/"} {gsub("@","-",$NF); printf "with-plugin-%s ", $NF}')"
           } >>$GITHUB_OUTPUT
 
       - name: Extract metadata for container image
