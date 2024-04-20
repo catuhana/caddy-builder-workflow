@@ -17,6 +17,7 @@ on:
         default: github.com/caddy-dns/cloudflare
 
 env:
+  IMAGE_NAME: caddy
   CADDY_VERSION: ${{ github.event.inputs.caddy_version }}
   XCADDY_VERSION: ${{ github.event.inputs.xcaddy_version }}
 
@@ -81,9 +82,10 @@ jobs:
         id: container-metadata
         with:
           images: |
-            tuhana/caddy
-            ghcr.io/${{ github.repository }}
+            tuhana/${{ env.IMAGE_NAME }}
+            ghcr.io/${{ env.IMAGE_NAME }}
           tags: |
+            latest
             ${{ env.CADDY_VERSION }}
             ${{ steps.container-plugin-tags.outputs.container-plugin-tags }}
 
