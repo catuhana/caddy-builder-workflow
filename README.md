@@ -10,7 +10,7 @@ I am aware that we can just build it on a host machine with [the same way as thi
 
 ## How to Build Caddy Myself Using This?
 
-Just fork the repo, go to GitHub Actions page, enable actions and just dispatch the workflow.
+If you want a custom build of Caddy with a plugin you want, you can just create an issue about it and I will build it. But if you'd like to have your own builds, just fork the repo, go to GitHub Actions page, enable actions and just dispatch the workflow.
 
 > [!WARNING]
 >
