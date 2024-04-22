@@ -15,3 +15,8 @@ If you want a custom build of Caddy with a plugin you want, you can just create 
 > [!WARNING]
 >
 > You might want to remove the line `tuhana/${{ env.IMAGE_NAME }}` on the workflow file to prevent Docker image push errors. This will only push the image to GitHub Container Registry, skipping Docker Hub.
+
+## To Do
+
+- [ ] [Support branches and tags on xcaddy.](https://github.com/caddyserver/xcaddy?tab=readme-ov-file#custom-builds:~:text=%3Ccaddy_version%3E%20is,commit%20like%20a58f240d3ecbb59285303746406cab50217f8d24)
+- [ ] Periodical check for Caddy updates to automatically detect new versions and run the workflow.
